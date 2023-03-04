@@ -6,7 +6,12 @@ CloudTrail EventLogs has
 * CloudTrail Management Events -> Create VPC, Create S3 Bucket...
 * CloudTrail Data Events -> Get S3 Objects, List S3 Objects...
 
-We can add EventBridge rules eg
+#### Monitoring and Action
+eg. We can add EventBridge rules 
+```text
+  "detail-type": "AWS API Call via CloudTrail",
+  "source": "aws.s3"
+```
 
 ## AWS Security Hub
 Security Hub is a central security tool which aggregates alerts from other Security Tools like GuardDuty, Inspector, Macie, IAM Access Analyzer, AWS Systems Manager, AWS Firewall Manager, AWS Partner Network Solutions
@@ -17,6 +22,14 @@ When setting up Security Hub, we must enable/disable security standards like:
 * CIS AWS Foundations,
 * PCI DSS
 * AWS Foundational Security Best Practices
+
+#### Monitoring and Action
+eg. We can add EventBridge Rule on 
+```text
+  "detail-type": "Security Hub Findings - Imported",
+  "source": "aws.securityhub",
+```
+
 
 
 ## AWS Config
@@ -39,6 +52,12 @@ With this information, you can determine, for example, if an IAM user has used p
 The AWS Config console includes a timeline view of this information.
 
 
+#### Monitoring and Action
+We can add EventBridge rules on 
+```text
+  "detail-type": "Config Rules Compliance Change",
+  "source": "aws.config",
+```
 
 ## AWS GuardDuty 
 AWS GuardDuty is a **MACHINE LEARNING** based anomaly and threat detection service to identify suspicious activity, such as unauthorized access attempts and malicious IP addresses.  
@@ -49,12 +68,23 @@ It monitors
 * Kubernetes Audit Logs
 * **Can protect against CryptoCurrency attacks** (has a dedicated “finding” for it)
 
+#### Monitoring and Action
+We can add EventBridge rules
+```text
+  "detail-type": "GuardDuty Finding",
+  "source": "aws.guardduty",
+```
 
 
 ## AWS Inspector
 Amazon Inspector only **evaluates EC2 instances, Container Images & Lambda functions** for software vulnerabilities (against database of CVE) and unintended network exposure.
 
-
+#### Monitoring and Action
+We can add EventBridge rules on
+```text
+  "detail-type": "Inspector2 Finding",
+  "source": "aws.inspector2",
+```
 
 ## AWS Detective
 AWS Detective provides investigative process with prebuilt data aggregations, summaries, and context for DEEP root cause analysis   
@@ -68,6 +98,13 @@ AWS Trusted Advisor analyses your AWS account and provides Free recommendations 
 3. **Security**: MFA enabled on Root Account, IAM key rotation, exposed Access Keys, S3 Bucket Permissions for public access, security groups with unrestricted ports 
 4. **Fault Tolerance**: EBS snapshots age, Availability Zone Balance, ASG Multi-AZ, RDS Multi-AZ, ELB configuration… 
 5. **Service Limits**
+
+#### Monitoring and Action
+We can add EventBridge rules on 
+```text
+  "detail-type": "Trusted Advisor Check Item Refresh Notification",
+  "source": "aws.trustedadvisor",
+```
 
 
 ## Penetration Testing on AWS Cloud
@@ -92,7 +129,7 @@ AWS customers are welcome to carry out security assessments or penetration tests
 
 
 ## AWS Audit Manager
-AWS Audit Manager maps your compliance requirements to AWS usage data with prebuilt and custom frameworks and automated evidence collection to generate compliance reports alongside evidence folders. Prebuilt Feameworks include
+AWS Audit Manager maps your compliance requirements to AWS usage data with prebuilt and custom frameworks and automated evidence collection to **generate compliance reports alongside evidence folders**. Prebuilt Frameworks include
 * CIS AWS Foundations Benchmark 1.2.0 & 1.3.0
 * General Data Protection Regulation (GDPR),
 * Health Insurance Portability and Accountability Act (HIPAA)
@@ -110,7 +147,7 @@ VPC Flow Logs capture information about IP traffic going into interfaces (to eit
 ![](imgs/vpc_flow_logs.png)
 
 
-### * VPC Flow Logs - The following traffic is NOT CAPTURED
+### The following traffic is NOT CAPTURED
 * Traffic to Amazon DNS server (custom DNS server traffic is logged)
 * Traffic for Amazon Windows license activation
 * Traffic to and from 169.254.169.254 for EC2 instance metadata
@@ -127,7 +164,12 @@ AWS Macie Used to analyze and identify sensitive data in your S3 buckets usin
 2. **Custom Data Identifier** -> A set of criteria that you define to detect sensitive data using Regular expression, keywords eg. employee IDs, customer account numbers  
 You can use Allow Lists to define a text pattern to ignore (e.g., public phone numbers)
 
-
+#### Monitoring and Action
+We can add EventBridge rules on 
+```text
+  "detail-type": "Macie Finding",
+  "source": "aws.macie",
+```
 
 ## Unified CloudWatch Agent
 Collect additional system-level metrics such as RAM, processes, used disk space, etc from EC2 instances, on-premises servers, …)
@@ -137,7 +179,80 @@ No logs from inside your EC2 instance will be sent to CloudWatch Logs without us
 ## AWS Athena
 Amazon Athena – Federated Query allows you to run SQL queries across data stored in relational, non-relational, object, and custom data sources (AWS or on-premises). It uses Data Source Connectors that run on AWS Lambda to run Federated Queries (e.g., CloudWatch Logs, DynamoDB, RDS, …) and stores the results back in Amazon S3.
 
+The permissions required to run Athena queries include the following:
+* Amazon S3 locations where the underlying data to query is stored.
+* Metadata and resources that you store in the AWS Glue Data Catalog, such as databases and tables, including additional actions for encrypted metadata.
+* Athena API actions.
 
+
+## AWS WAF
+You use AWS WAF to protect your web applications from common web exploits (Layer 7).  
+You do this by defining a web access control list (ACL) and then associating it with one or more web application resources that you want to protect.
+
+Can be deployed on
+* Application Load Balancer (localized rules)
+* API Gateway (rules running at the regional or edge level)
+* CloudFront (rules globally on edge locations)
+  * Used to front other solutions: CLB, EC2 instances, custom origins, S3 websites
+* Deploy on AppSync (protect your GraphQL APIs)
+
+Define Web ACL (Web Access Control List):
+* Rules can include IP addresses, HTTP headers, HTTP body, or URI strings
+* Protects from common attack - SQL injection and Cross-Site Scripting (XSS)
+* Size constraints, Geo match
+* Rate-based rules (to count occurrences of events)
+* Rule Actions: Count | Allow | Block | CAPTCHA
+
+You can instruct **AWS WAF to insert custom headers into the original HTTP request** when a rule action doesn't block the request.  
+With this option, you only add to the request. You can't modify or replace any part of the original request.  
+Use cases for custom header insertion include signaling a downstream application to process the request differently based on the inserted headers, and flagging the request for analysis.
+
+### AWS WAF – Managed Rules
+
+Library of over 190 Ready-to-use rules that are managed by AWS and AWS Marketplace Sellers
+
+#### Baseline Rule Groups – general protection from common threats
+  AWSManagedRulesCommonRuleSet, AWSManagedRulesAdminProtectionRuleSet, …
+#### Use-case Specific Rule Groups – protection for many AWS WAF use cases
+ AWSManagedRulesSQLiRuleSet, AWSManagedRulesWindowsRuleSet, 
+ AWSManagedRulesPHPRuleSet, AWSManagedRulesWordPressRuleSet, …
+#### IP Reputation Rule Groups – block requests based on source (e.g., malicious IPs)
+  AWSManagedRulesAmazonIpReputationList, AWSManagedRulesAnonymousIpList
+####Bot Control Managed Rule Group – block and manage requests from bots
+  AWSManagedRulesBotControlRuleSet
+
+## AWS Shield 
+AWS Shield, a managed Distributed Denial of Service (DDoS) protection service that safeguards applications running on AWS
+
+#### AWS Shield Standard:
+* Free service that is activated for every AWS customer
+* Provides protection from attacks such as SYN/UDP Floods, Reflection attacks and other layer 3/layer 4 attacks
+
+#### AWS Shield Advanced:
+* Optional DDoS mitigation service ($3,000 per month per organization)
+* Protect against more sophisticated attack on Amazon EC2, Elastic Load Balancing (ELB), Amazon CloudFront, AWS Global Accelerator, and Route 53
+* 24/7 access to AWS DDoS response team (DRP)
+* Protect against higher fees during usage spikes due to DDoS
+* Shield Advanced automatic application layer DDoS mitigation automatically creates, evaluates and deploys AWS WAF rules to mitigate layer 7 attacks
+
+### Shield Advanced CloudWatch Metrics
+* Helps you to detect if there’s a DDoS attack happening
+* DDoSDetected – indicates whether a DDoS event is happening for a specific resource
+* DDoSAttackBitsPerSecond – number of bits per second during a DDoS event for a specific resource
+* DDoSAttackPacketsPerSecond – number of packets per second during a DDoS event for a specific resource
+* *DDoSAttackRequestsPerSecond – number of requests per second during a DDoS event for a specific resource
+
+## AWS Firewall Manager
+Manage rules in all accounts of an AWS Organization
+
+Security policy: common set of security rules
+* WAF rules (Application Load Balancer, API Gateways, CloudFront)
+* AWS Shield* Advanced (ALB, CLB, NLB, Elastic IP, CloudFront)
+* Security Groups for EC2, Application Load BAlancer and ENI resources in VPC
+* AWS Network Firewall (VPC Level)
+* Amazon Route 53 Resolver DNS Firewall
+* Policies are created at the region level
+* Rules are applied to new resources as they are created (good for compliance) across all and future accounts in your Organization
 
 ## AWS Site to Site VPN
 AWS Site to Site VPN connects AWS VPC to Customer On-Premise VPC using
