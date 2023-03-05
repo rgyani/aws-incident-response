@@ -446,3 +446,15 @@ Requests the top-level metadata items using the token
 [ec2-user ~]$ curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/
 ```
 
+
+## DHCP option sets in Amazon VPC
+Dynamic Host Configuration Protocol (DHCP) option sets give you control over the following aspects of routing in your virtual network:
+* You can control the DNS servers, domain names, or Network Time Protocol (NTP) servers used by the devices in your VPC.
+* You can disable DNS resolution completely in your VPC.
+
+#### What is DHCP?
+Every device on a TCP/IP network requires an IP address to communicate over the network. In the past, IP addresses had to be assigned to each device in your network manually. Today, IP addresses are assigned dynamically by DHCP servers using the Dynamic Host Configuration Protocol (DHCP).
+
+Applications running on EC2 instances in subnets can communicate with Amazon DHCP servers as needed to retrieve their IP address lease or other network configuration information (such as the IP address of an Amazon DNS server or the IP address of the router in your VPC).
+
+Amazon VPC enables you to specify the network configurations that are provided by Amazon DHCP servers by using DHCP option sets.
