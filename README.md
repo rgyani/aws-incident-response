@@ -3,8 +3,24 @@
 ## AWS Cloudtrail
 AWS Cloudtrail logs the AWS API activities from Console, SDK, CLI and AWS Services eg. create Bucket, launch EC2 etc.  
 CloudTrail EventLogs has
-* CloudTrail Management Events -> Create VPC, Create S3 Bucket...
+* CloudTrail Management Events -> Create VPC, Create S3 Bucket...  
 * CloudTrail Data Events -> Get S3 Objects, List S3 Objects...
+* CloudTrail Insights Events -> capture unusual activity that is detected in your account.
+
+Both Management and Data Events can be further filtered to Choose the activities you want to log.
+  * Read
+  * Write
+  * Exclude AWS KMS events
+  * Exclude Amazon RDS Data API events
+
+We can create trails which put logs from CloudTrail into S3 and optionally into CloudWatch Logs also  
+
+To determine whether a log file was modified, deleted, or unchanged after CloudTrail delivered it, you can use **CloudTrail log file integrity validation.**   
+When you enable log file integrity validation, CloudTrail creates a hash for every log file that it delivers.   
+Every hour, CloudTrail also creates and delivers a file that references the log files for the last hour and contains a hash of each. This file is called a digest file.  
+CloudTrail signs each digest file using the private key of a public and private key pair. After delivery, you can use the public key to validate the digest file.
+
+This makes it computationally infeasible to modify, delete or forge CloudTrail log files without detection. You can use the AWS CLI to validate the files in the location where CloudTrail delivered them. 
 
 #### Monitoring and Action
 eg. We can add EventBridge rules 
@@ -60,13 +76,22 @@ We can add EventBridge rules on
 ```
 
 ## AWS GuardDuty 
-AWS GuardDuty is a **MACHINE LEARNING** based anomaly and threat detection service to identify suspicious activity, such as unauthorized access attempts and malicious IP addresses.  
+AWS GuardDuty is a **MACHINE LEARNING** based **NEAR-REAL TIME** anomaly and threat detection service to identify suspicious activity, such as unauthorized access attempts and malicious IP addresses.  
 It monitors
 * CloudTrail EventLogs, 
 * VPC Flow Logs
 * DNS Logs
 * Kubernetes Audit Logs
 * **Can protect against CryptoCurrency attacks** (has a dedicated “finding” for it)
+
+**GuardDuty does not store logs or historical findings**
+
+#### Suppression rules
+A suppression rule is a set of criteria, consisting of a filter attribute paired with a value, used to filter findings by automatically archiving new findings that match the specified criteria.   
+Suppression rules can be used to filter low-value findings, false positive findings, or threats you do not intend to act on, to make it easier to recognize the security threats with the most impact to your environment.  
+After you create a suppression rule, new findings that match the criteria defined in the rule are automatically archived as long as the suppression rule is in place. 
+
+Suppressed findings are not sent to AWS Security Hub, Amazon S3, Detective, or CloudWatch, reducing finding noise level
 
 #### Monitoring and Action
 We can add EventBridge rules
@@ -309,7 +334,7 @@ After you create the role, you must provide the role's Amazon Resource Name (ARN
 ```
 
 
-# AWS S3 Glacier Vault
+## AWS S3 Glacier Vault
 A S3 Glacier Vault is a container for storing archives. 
 
 **S3 Glacier Vault Lock** helps you to easily enforce compliance controls for S3 Glacier vaults with a Vault Lock policy. You can 
@@ -393,4 +418,31 @@ There are two retention modes for Vault Locks
 * Most users can't overwrite or delete an object version or alter its lock settings 
 * Some users have special permissions to change the retention or delete the objec
 
+
+## Instance Metadata
+Instance metadata is data about your instance that you can use to configure or manage the running instance. 
+Instance metadata is divided into categories, for example, host name, events, and security groups.
+
+You can also use instance metadata to access user data that you specified when launching your instance. For example, you can specify parameters for configuring your instance, or include a simple script. You can build generic AMIs and use user data to modify the configuration files supplied at launch time. 
+
+
+You can access instance metadata from a running instance using one of the following methods:
+* Instance Metadata Service Version 1 (IMDSv1) – a request/response method
+* Instance Metadata Service Version 2 (IMDSv2) – a session-oriented method
+
+#### How Instance Metadata Service Version 2 works
+IMDSv2 uses session-oriented requests. With session-oriented requests, you create a session token that defines the session duration, which can be a minimum of one second and a maximum of six hours. 
+During the specified duration, you can use the same session token for subsequent requests. After the specified duration expires, you must create a new session token to use for future requests.
+
+The following example uses a Linux shell script and IMDSv2 to retrieve the top-level instance metadata items. The example:
+
+Creates a session token lasting six hours (21,600 seconds) using the PUT request
+```text
+[ec2-user ~]$ TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
+```
+
+Requests the top-level metadata items using the token
+```text
+[ec2-user ~]$ curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/
+```
 
