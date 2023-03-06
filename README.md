@@ -458,3 +458,17 @@ Every device on a TCP/IP network requires an IP address to communicate over the 
 Applications running on EC2 instances in subnets can communicate with Amazon DHCP servers as needed to retrieve their IP address lease or other network configuration information (such as the IP address of an Amazon DNS server or the IP address of the router in your VPC).
 
 Amazon VPC enables you to specify the network configurations that are provided by Amazon DHCP servers by using DHCP option sets.
+
+
+## Cloudfront Private Content
+
+To use private content with Amazon CloudFront, you’ll need an Amazon CloudFront distribution with private content enabled and a list of authorized accounts you trust to access your private content. 
+
+From the Create Distribution Wizard in the Amazon CloudFront console, start creating a web distribution. In the ”’Origin Settings”’ section, select an Amazon S3 bucket that you’ve created for private content only, and make sure you select the options as below:
+![](imgs/a5-1.png)
+
+This will set the permissions on your Amazon S3 bucket to protect your content from being accessed publicly, but still allow CloudFront to access your content.
+
+![](imgs/a6.png)
+Continue creating your distribution, and at the bottom of the Default Cache Behavior Settings section, make sure you enable the Restrict Viewer Access option and select self as the trusted signer. These are called trusted signers because you’re trusting URLs that are signed by them and allowing them to access your private content. In our example, we’re using self as the only trusted signer, which means that only your account can sign URLs to access your CloudFront private content.
+
