@@ -232,6 +232,14 @@ You can instruct **AWS WAF to insert custom headers into the original HTTP reque
 With this option, you only add to the request. You can't modify or replace any part of the original request.  
 Use cases for custom header insertion include signaling a downstream application to process the request differently based on the inserted headers, and flagging the request for analysis.
 
+AWS WAF is tightly integrated with Amazon CloudFront and the Application Load Balancer (ALB), services that AWS customers commonly use to deliver content for their websites and applications.
+
+When you use AWS WAF on Amazon CloudFront, your rules run in all AWS Edge Locations, located around the world close to your end users. This means security doesn’t come at the expense of performance. Blocked requests are stopped before they reach your web servers. 
+
+When you use AWS WAF on Application Load Balancer, your rules run in region and can be used to protect internet-facing as well as internal load balancers.
+
+
+
 ### AWS WAF – Managed Rules
 
 Library of over 190 Ready-to-use rules that are managed by AWS and AWS Marketplace Sellers
