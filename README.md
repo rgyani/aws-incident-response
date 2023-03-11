@@ -473,6 +473,7 @@ Amazon VPC enables you to specify the network configurations that are provided b
 To use private content with Amazon CloudFront, you’ll need an Amazon CloudFront distribution with private content enabled and a list of authorized accounts you trust to access your private content. 
 
 From the Create Distribution Wizard in the Amazon CloudFront console, start creating a web distribution. In the ”’Origin Settings”’ section, select an Amazon S3 bucket that you’ve created for private content only, and make sure you select the options as below:
+
 ![](imgs/a5-1.png)
 
 This will set the permissions on your Amazon S3 bucket to protect your content from being accessed publicly, but still allow CloudFront to access your content.
