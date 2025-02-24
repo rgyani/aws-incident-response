@@ -454,6 +454,21 @@ Requests the top-level metadata items using the token
 [ec2-user ~]$ curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/
 ```
 
+AWS encourages enabling IDMSv2 exclusively (disabling IDMSv1) using:
+```bash
+aws ec2 modify-instance-metadata-options --instance-id <instance_id> --http-endpoint enabled --http-tokens required
+```
+
+#### Why IDMSv2
+In IDMSv1, if an attacker exploited a web application’s **Server-Side Request Forgery (SSRF)** vulnerability, they could request instance metadata directly.  
+IDMSv2 prevents this by enforcing:
+* IDMSv2 requires a session token to access metadata, preventing unauthorized access.
+* IDMSv1 allowed unauthenticated HTTP GET requests, making it vulnerable to SSRF attacks.
+* PUT request to create a session token (no direct GET requests).
+* Time-limited and role-scoped tokens (reducing attack impact).
+* IMDS hop limit to prevent container breakout attacks.
+* IDMSv2 ensures only properly authenticated requests can retrieve credentials.
+
 
 ## DHCP option sets in Amazon VPC
 Dynamic Host Configuration Protocol (DHCP) option sets give you control over the following aspects of routing in your virtual network:
